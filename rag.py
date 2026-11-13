@@ -1,5 +1,6 @@
 import os
 import argparse
+import chromadb
 from openai import OpenAI
 from dotenv import load_dotenv
 load_dotenv()
@@ -20,10 +21,14 @@ if __name__=="__main__":
             chunk=content[i:i+100]
             chunks.append(chunk)
         question=input("你的问题是： ")
-        relevant_chunk = "未找到相关资料"
-        for chunk in chunks:
-            if "学号" in chunk:
-                relevant_chunk=chunk
+        client_db = chromadb.Client()
+        collection = client_db.create_collection(name="my_knowledge")
+        collection.add(documents=chunks, ids=[str(i) for i in range(len(chunks))])
+        results = collection.query(
+            query_texts=[question], 
+            n_results=1
+        )
+        relevant_chunk = results['documents'][0][0]
         response=client.chat.completions.create(
             model="deepseek-flash",
             messages=[

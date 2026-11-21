@@ -20,6 +20,9 @@ st.title("我的RAG知识库")
 if st.sidebar.button("🗑️ 清空对话记录"):
     # 1. 清空脑子里的记忆
     st.session_state.messages = []
+    # 👇 新增：把上传组件的记忆也清空
+    if "csv_uploader" in st.session_state:
+        del st.session_state["csv_uploader"]
     # 2. 如果硬盘里有文件，就删掉
     if os.path.exists("history.json"):
         os.remove("history.json")
@@ -39,7 +42,7 @@ if st.session_state.messages: # 如果有聊天记录，才显示下载按钮
         mime="text/plain"
     )
 # 1. 造一个上传文件的按钮
-uploaded_file = st.file_uploader("请上传你的数据文件 (CSV格式)", type=["csv"])
+uploaded_file = st.file_uploader("请上传你的数据文件 (CSV格式)", type=["csv"],key="csv_uploader")
 # 2. 如果用户真的传了文件
 if uploaded_file is not None:
     # 3. 拿到文件的二进制数据（电脑底层存的都是0101）
